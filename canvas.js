@@ -1,61 +1,74 @@
-var canvas = document.querySelector('canvas')
+const canvas = document.querySelector('canvas')
 canvas.width = window.innerWidth
 canvas.height = window.innerHeight
 
-var ctx = canvas.getContext('2d')
-
-// create the mouse object
-var mouse = {
-  x: undefined,
-  y: undefined,
-}
+const ctx = canvas.getContext('2d')
 
 // constants
 const maxRadius = 70
 const growthRate = 1.8
 const shrinkRate = 0.3
-var clicks = 0
 
-var colorArray = [
-  '#fa3',
-  '#5fb',
-  '#f22',
-  '#37f',
-  '#ff2',
-  '#f7d',
-  '#bbb',
-  '#5f5',
-]
+// generate random hexadecimal color
+function randomColor() {
+  return '#' + Math.floor(Math.random() * 16777215).toString(16)
+}
 
-// assign event to mouse object
-window.addEventListener('mousemove', function (event) {
-  mouse.x = event.x
-  mouse.y = event.y
-})
+// create the mouse object
+const mouse = {
+  x: undefined,
+  y: undefined,
+}
 
-// window.onresize = () => {}
+function handleMouseMove(event) {
+  console.log('x' + event.x)
+  console.log('y' + event.y)
+
+  if (
+    event.x > canvas.width - 10 ||
+    event.y > canvas.height - 10 ||
+    event.x < 10 ||
+    event.y < 10
+  ) {
+    mouse.x = undefined
+    mouse.y = undefined
+  } else {
+    mouse.x = event.x
+    mouse.y = event.y
+  }
+}
+
+function handleCanvasClick() {
+  if (times > 0) times--
+
+  ballArray.forEach((ball) => {
+    ball.color = randomColor()
+  })
+}
+
+// event listeners
+let times = 20
+canvas.addEventListener('click', handleCanvasClick)
+
+canvas.addEventListener('mousemove', handleMouseMove)
+
 window.addEventListener('resize', function () {
   canvas.width = window.innerWidth
   canvas.height = window.innerHeight
 })
 
-// constructor function
-function Circle(x, y, dx, dy, radius) {
-  this.x = x
-  this.y = y
-  this.dx = dx
-  this.dy = dy
-  this.radius = radius
-  this.minRadius = radius
-  this.color = colorArray[Math.floor(Math.random() * colorArray.length)]
+class Circle {
+  constructor(x, y, dx, dy, radius) {
+    this.x = x
+    this.y = y
+    this.dx = dx
+    this.dy = dy
+    this.radius = radius
+    this.minRadius = radius
+    this.color = randomColor()
+  }
 
-  // change colors
-  canvas.addEventListener('click', () => {
-    clicks++
-    this.color = 'transparent'
-  })
-
-  this.draw = function () {
+  draw() {
     ctx.beginPath()
     ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2, false)
     ctx.stroke()
@@ -64,7 +77,7 @@ function Circle(x, y, dx, dy, radius) {
     ctx.closePath()
   }
 
-  this.copyRight = () => {
+  copyRight() {
     this.update() // so that it moves
 
     ctx.beginPath()
@@ -74,15 +87,19 @@ function Circle(x, y, dx, dy, radius) {
     ctx.fill()
 
     ctx.font = `${this.radius / 5}px Arial`
-    ctx.fillStyle = 'blue'
-    ctx.fillText('', this.x - this.radius / 1.8, this.y - this.radius / 4)
+    ctx.fillStyle = 'purple'
+    ctx.fillText(
+      `click ${times} times!`,
+      this.x - this.radius / 1.7,
+      this.y + this.radius / 12
+    )
     ctx.font = `${this.radius / 3.3}px Arial`
     ctx.fillStyle = 'black'
     ctx.fillText('', this.x - this.radius / 1.12, this.y + this.radius / 9)
     ctx.closePath()
   }
 
-  this.update = function () {
+  update() {
     this.draw()
 
     if (this.x + this.radius > innerWidth || this.x - this.radius < 0) {
@@ -112,9 +129,9 @@ function Circle(x, y, dx, dy, radius) {
   }
 }
 
-var ballArray = []
+let ballArray = []
 
-for (var i = 0; i < 330; i++) {
+for (let i = 0; i < 330; i++) {
   var radius, x, y, dx, dy
   radius = Math.random() * 4 + 1
   x = Math.random() * (innerWidth - radius * 2) + radius
@@ -125,22 +142,32 @@ for (var i = 0; i < 330; i++) {
   ballArray.push(new Circle(x, y, dx, dy, radius))
 }
 
-var blackBall = new Circle(
+var whiteBall = new Circle(
   Math.random() * (innerWidth - radius * 2) + radius,
   Math.random() * (innerHeight - radius * 2) + radius,
   (Math.random() - 0.5) * 2,
   (Math.random() - 0.5) * 2,
-  Math.random() * 4 + 1
+  20
+  //Math.random() * 4 + 1
 )
 
 function animate() {
   requestAnimationFrame(animate)
-  ctx.clearRect(0, 0, innerWidth, innerHeight)
+  if (times !== 0) {
+    ctx.clearRect(0, 0, innerWidth, innerHeight)
+  } else {
+    canvas.removeEventListener('mousemove', handleMouseMove)
+    canvas.removeEventListener('click', handleCanvasClick)
+    mouse.x = undefined
+    mouse.y = undefined
+  }
 
   for (var i = 0; i < ballArray.length; i++) {
     ballArray[i].update()
   }
 
-  blackBall.copyRight()
+  if (times !== 0) {
+    whiteBall.copyRight()
+  }
 }
 animate()
