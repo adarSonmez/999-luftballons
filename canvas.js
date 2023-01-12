@@ -21,9 +21,6 @@ const mouse = {
 }
 
 function handleMouseMove(event) {
-  console.log('x' + event.x)
-  console.log('y' + event.y)
-
   if (
     event.x > canvas.width - 10 ||
     event.y > canvas.height - 10 ||
@@ -38,7 +35,7 @@ function handleMouseMove(event) {
   }
 }
 
-function handleCanvasClick() {
+function handleCanvasClick(event) {
   if (times > 0) times--
 
   ballArray.forEach((ball) => {
@@ -77,28 +74,6 @@ class Circle {
     ctx.closePath()
   }
 
-  copyRight() {
-    this.update() // so that it moves
-
-    ctx.beginPath()
-    ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2, false)
-    ctx.stroke()
-    ctx.fillStyle = 'white'
-    ctx.fill()
-
-    ctx.font = `${this.radius / 5}px Arial`
-    ctx.fillStyle = 'purple'
-    ctx.fillText(
-      `click ${times} times!`,
-      this.x - this.radius / 1.7,
-      this.y + this.radius / 12
-    )
-    ctx.font = `${this.radius / 3.3}px Arial`
-    ctx.fillStyle = 'black'
-    ctx.fillText('', this.x - this.radius / 1.12, this.y + this.radius / 9)
-    ctx.closePath()
-  }
-
   update() {
     this.draw()
 
@@ -129,6 +104,34 @@ class Circle {
   }
 }
 
+class WhiteCircle extends Circle {
+  constructor(x, y, dx, dy, radius) {
+    super(x, y, dx, dy, radius)
+  }
+
+  content() {
+    this.update() // so that it moves
+
+    ctx.beginPath()
+    ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2, false)
+    ctx.stroke()
+    ctx.fillStyle = 'white'
+    ctx.fill()
+
+    ctx.font = `${this.radius / 5}px Arial`
+    ctx.fillStyle = 'purple'
+    ctx.fillText(
+      `click ${times} times!`,
+      this.x - this.radius / 1.7,
+      this.y + this.radius / 12
+    )
+    ctx.font = `${this.radius / 3.3}px Arial`
+    ctx.fillStyle = 'black'
+    ctx.fillText('', this.x - this.radius / 1.12, this.y + this.radius / 9)
+    ctx.closePath()
+  }
+}
+
 let ballArray = []
 
 for (let i = 0; i < 330; i++) {
@@ -142,7 +145,7 @@ for (let i = 0; i < 330; i++) {
   ballArray.push(new Circle(x, y, dx, dy, radius))
 }
 
-var whiteBall = new Circle(
+var whiteCircle = new WhiteCircle(
   Math.random() * (innerWidth - radius * 2) + radius,
   Math.random() * (innerHeight - radius * 2) + radius,
   (Math.random() - 0.5) * 2,
@@ -167,7 +170,7 @@ function animate() {
   }
 
   if (times !== 0) {
-    whiteBall.copyRight()
+    whiteCircle.content()
   }
 }
 animate()
